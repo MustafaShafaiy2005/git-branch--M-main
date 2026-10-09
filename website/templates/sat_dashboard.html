@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %} | Digital SAT Mock Tests{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+
+    <!-- Page Heading -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 font-weight-bold">
+
+        </h1>
+
+        <h2 class="h4 mt-3">
+            Digital SAT Mock Tests
+        </h2>
+
+        <p class="lead text-muted mt-3">
+            Prepare for the Digital SAT with full-length adoptive practice tests,
+            realistic exam conditions, and detailed score reports.
+        </p>
+
+        <!-- Main Buttons -->
+        <div class="mt-4">
+            <a href="{{ url_for('views.mock_tests') }}"
+               class="btn btn-primary btn-lg mb-2">
+                <i class="fas fa-file-alt mr-2"></i>
+                Full-Length SAT Mock Tests
+            </a>
+
+            <a href="{{ url_for('views.score_history') }}"
+               class="btn btn-outline-primary btn-lg ml-md-2 mb-2">
+                <i class="fas fa-chart-line mr-2"></i>
+                My Score History
+            </a>
+        </div>
+    </div>
+
+    <!-- SAT Sections -->
+    <div class="row">
+
+        <!-- Reading and Writing -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-4">
+
+                    <div class="mb-3">
+                        <i class="fas fa-book-open fa-2x text-primary"></i>
+                    </div>
+
+                    <h3>Reading and Writing</h3>
+
+                    <p class="text-muted">
+                        Improve your reading comprehension, grammar,
+                        vocabulary, and analytical skills.
+                    </p>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Questions</span>
+                        <strong>54</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Time</span>
+                        <strong>64 minutes</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span>Modules</span>
+                        <strong>2</strong>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Math -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-4">
+
+                    <h3>Math</h3>
+
+                    <p class="text-muted">
+                        Practice algebra, advanced math, problem-solving,
+                        data analysis, and geometry.
+                    </p>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Questions</span>
+                        <strong>44</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Time</span>
+                        <strong>70 minutes</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span>Modules</span>
+                        <strong>2</strong>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Adaptive Testing Information -->
+    <div class="card mt-3 shadow-sm">
+        <div class="card-body p-4">
+
+            <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-brain fa-2x text-primary mr-3"></i>
+                <h4 class="mb-0">Adaptive Testing</h4>
+            </div>
+
+            <p>
+                The Digital SAT uses two modules in each section.
+                Your performance in the first module determines the
+                difficulty level of the second module.
+            </p>
+
+            <p class="text-muted mb-0">
+                Complete practice tests to track your progress and
+                review your results in My Score History.
+            </p>
+
+        </div>
+    </div>
+
+    <!-- Creator Reference -->
+    <footer class="text-center mt-5 pt-4 border-top">
+        <p class="text-muted mb-1">
+
+        </p>
+
+        <p class="mb-0">
+            Created by <strong>Mustafa Shafaiy</strong>
+        </p>
+
+        <small class="text-muted">
+            © 2026 Adoptive Practice Testing. All rights reserved.
+        </small>
+    </footer>
+
+</div>
+{% endblock %}

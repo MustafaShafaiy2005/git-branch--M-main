@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}{{ mock_test.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+
+    <!-- Mock Test Header -->
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+        <div>
+            <h2>{{ mock_test.title }}</h2>
+
+            <p class="text-muted">
+                {{ mock_test.description or
+                   'Full-length SAT practice test.' }}
+            </p>
+
+            <p>
+                <strong>Status:</strong>
+                {% if mock_test.is_active %}
+                    <span class="text-success">Active</span>
+                {% else %}
+                    <span class="text-secondary">Inactive</span>
+                {% endif %}
+            </p>
+        </div>
+
+        <a href="{{ url_for('views.mock_tests') }}"
+           class="btn btn-outline-secondary">
+            Back to Mock Tests
+        </a>
+    </div>
+
+    <!-- Test Overview and Start Button -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h5>Test Overview</h5>
+
+            {% if current_user.is_authenticated and current_user.is_admin %}
+
+                <p class="mb-3">
+                    <strong>Active questions:</strong>
+                    {{ mock_test.questions
+                       | selectattr('is_active')
+                       | list
+                       | length }}
+                </p>
+
+                <a
+                    href="{{ url_for(
+                        'views.add_question',
+                        collection='mock_test',
+                        mock_test_id=mock_test.id
+                    ) }}"
+                    class="btn btn-primary"
+                >
+                    + Add Question to This Test
+                </a>
+
+            {% endif %}
+
+            {% if mock_test.is_active %}
+                <form
+                    method="POST"
+                    action="{{ url_for(
+                        'views.start_mock_test',
+                        mock_test_id=mock_test.id
+                    ) }}"
+                    class="d-inline"
+                >
+                    <button type="submit" class="btn btn-success">
+                        Start Mock Test
+                    </button>
+                </form>
+            {% else %}
+                <button class="btn btn-secondary" disabled>
+                    Test Inactive
+                </button>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Assigned Questions: Admin Only -->
+    {% if current_user.is_authenticated and current_user.is_admin %}
+
+        <h4 class="mb-3">Questions Assigned to This Test</h4>
+
+        {% set active_questions = mock_test.questions
+            | selectattr('is_active')
+            | list %}
+
+        {% if active_questions %}
+
+            {% for question in active_questions %}
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                <h5>Question {{ loop.index }}</h5>
+
+                                <p class="mb-1">
+                                    <strong>Section:</strong>
+                                    {{ question.section }}
+                                </p>
+
+                                <p class="mb-1">
+                                    <strong>Module:</strong>
+                                    {{ question.module_number or 'Not assigned' }}
+                                </p>
+
+                                {% if question.module_number == 2 %}
+                                    <p class="mb-1">
+                                        <strong>Adaptive Route:</strong>
+                                        {{ question.module2_route or 'Not assigned' }}
+                                    </p>
+                                {% endif %}
+
+                                <p class="mb-1">
+                                    <strong>Domain:</strong>
+                                    {{ question.domain }}
+                                </p>
+
+                                <p class="mb-1">
+                                    <strong>Skill:</strong>
+                                    {{ question.skill }}
+                                </p>
+
+                                <p class="mb-3">
+                                    <strong>Difficulty:</strong>
+                                    {{ question.difficulty }}
+                                </p>
+                            </div>
+
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'views.delete_question',
+                                    question_id=question.id
+                                ) }}"
+                                onsubmit="return confirm(
+                                    'Delete this question permanently?'
+                                );"
+                            >
+                                <button
+                                    type="submit"
+                                    class="btn btn-outline-danger btn-sm"
+                                >
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+
+                        {% if question.passage %}
+                            <div class="bg-light p-3 rounded mb-3">
+                                <strong>Passage:</strong>
+                                <p class="mb-0">{{ question.passage }}</p>
+                            </div>
+                        {% endif %}
+
+                        <p>
+                            <strong>Question:</strong><br>
+                            {{ question.prompt }}
+                        </p>
+
+                        {% if question.image_path %}
+                            <div class="mb-3">
+                                <img
+                                    src="{{ url_for(
+                                        'static',
+                                        filename=question.image_path
+                                    ) }}"
+                                    alt="Question image"
+                                    class="img-fluid rounded"
+                                    style="max-width: 500px;"
+                                >
+                            </div>
+                        {% endif %}
+
+                        {% set choices = question.choices | from_json %}
+
+                        {% if choices %}
+                            <p><strong>Choices:</strong></p>
+
+                            <ol type="A">
+                                {% for letter, choice in choices.items() %}
+                                    <li class="mb-1">{{ choice }}</li>
+                                {% endfor %}
+                            </ol>
+                        {% endif %}
+
+                        <p class="mb-1">
+                            <strong>Correct Answer:</strong>
+                            {{ question.correct_answer }}
+                        </p>
+
+                        {% if question.explanation %}
+                            <details class="mt-3">
+                                <summary>View Explanation</summary>
+
+                                <p class="mt-2 mb-0">
+                                    {{ question.explanation }}
+                                </p>
+                            </details>
+                        {% endif %}
+
+                    </div>
+                </div>
+            {% endfor %}
+
+        {% else %}
+
+            <div class="alert alert-info">
+                This mock test has no active questions yet.
+                Use <strong>Add Question to This Test</strong>
+                to assign its first question.
+            </div>
+
+        {% endif %}
+
+    {% endif %}
+
+</div>
+{% endblock %}

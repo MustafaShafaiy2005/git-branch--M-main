@@ -1,0 +1,224 @@
+
+{% extends "base.html" %}
+
+{% block title %}SAT Question Bank{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+
+    <div class="mb-4">
+        <h1>SAT Question Bank</h1>
+        <p class="text-muted">
+            Select a section to browse its practice questions.
+        </p>
+    </div>
+
+    <!-- Section selection -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <button
+                type="button"
+                id="rwButton"
+                class="btn btn-outline-primary w-100 py-3"
+                onclick="showSection('Reading and Writing')">
+
+                <h5 class="mb-1">Reading and Writing</h5>
+                <span>{{ rw_count }} questions</span>
+            </button>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <button
+                type="button"
+                id="mathButton"
+                class="btn btn-outline-primary w-100 py-3"
+                onclick="showSection('Math')">
+
+                <h5 class="mb-1">Math</h5>
+                <span>{{ math_count }} questions</span>
+            </button>
+        </div>
+    </div>
+
+    {% if user.is_admin %}
+    <div class="mb-4">
+        <a href="{{ url_for('views.add_question') }}"
+           class="btn btn-primary">
+            + Add Question
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Initial message -->
+    <div id="sectionMessage" class="alert alert-info">
+        Choose Reading and Writing or Math above to view questions.
+    </div>
+
+    <!-- Questions -->
+    <div id="questionList" style="display: none;">
+
+        {% for question in questions %}
+        <div
+            class="card shadow-sm mb-4 question-card"
+            data-section="{{ question.section }}">
+
+            <div class="card-body p-4">
+
+                <!-- Question metadata -->
+                <div class="d-flex flex-wrap gap-2 mb-3">
+
+                    <span class="badge bg-primary">
+                        {{ question.section }}
+                    </span>
+
+                    {% if question.difficulty|lower == 'easy' %}
+                    <span class="badge bg-success">
+                        Easy
+                    </span>
+                    {% elif question.difficulty|lower == 'medium' %}
+                    <span class="badge bg-warning text-dark">
+                        Medium
+                    </span>
+                    {% elif question.difficulty|lower == 'hard' %}
+                    <span class="badge bg-danger">
+                        Hard
+                    </span>
+                    {% else %}
+                    <span class="badge bg-secondary">
+                        {{ question.difficulty }}
+                    </span>
+                    {% endif %}
+
+                    <span class="badge bg-info text-dark">
+                        {{ question.domain }}
+                    </span>
+
+                    <span class="badge bg-light text-dark border">
+                        {{ question.skill }}
+                    </span>
+
+                </div>
+
+                <!-- Passage -->
+                {% if question.passage %}
+                <div class="p-3 bg-light border rounded mb-3">
+                    <h6>Passage</h6>
+                    <div style="white-space: pre-wrap;">{{ question.passage }}</div>
+                </div>
+                {% endif %}
+
+                <!-- Prompt -->
+                <h5>Question {{ loop.index }}</h5>
+
+                <div class="mb-4" style="white-space: pre-wrap;">{{ question.prompt }}</div>
+
+                <!-- Choices -->
+                {% set choices = question.choices|from_json %}
+
+                {% for letter in ['A', 'B', 'C', 'D'] %}
+                <div class="border rounded p-3 mb-2">
+                    <strong>{{ letter }}.</strong>
+                    {{ choices.get(letter, '') }}
+                </div>
+                {% endfor %}
+
+                <!-- Answer review -->
+                <details class="mt-3">
+                    <summary class="fw-semibold">
+                        View correct answer and explanation
+                    </summary>
+
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <p>
+                            <strong>Correct answer:</strong>
+                            {{ question.correct_answer }}
+                        </p>
+
+                        <p class="mb-0">
+                            <strong>Explanation:</strong>
+                            <span style="white-space: pre-wrap;">{{ question.explanation }}</span>
+                        </p>
+                    </div>
+                </details>
+
+                <!-- Administrator-only deletion -->
+                {% if user.is_admin %}
+                <hr>
+
+                <form
+                    method="POST"
+                    action="{{ url_for('views.delete_question', question_id=question.id) }}"
+                    onsubmit="return confirm('Delete this question permanently?');">
+
+                    <button type="submit"
+                            class="btn btn-outline-danger btn-sm">
+                        Delete Question
+                    </button>
+                </form>
+                {% endif %}
+
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <div id="noQuestionsMessage"
+         class="alert alert-secondary"
+         style="display: none;">
+        No questions are available in this section yet.
+    </div>
+
+    <a href="{{ url_for('views.home') }}"
+       class="btn btn-outline-secondary mt-3">
+        &larr; Back to Dashboard
+    </a>
+
+</div>
+
+<script>
+    function showSection(section) {
+        const cards = document.querySelectorAll('.question-card');
+        const questionList = document.getElementById('questionList');
+        const sectionMessage = document.getElementById('sectionMessage');
+        const noQuestionsMessage = document.getElementById('noQuestionsMessage');
+        const rwButton = document.getElementById('rwButton');
+        const mathButton = document.getElementById('mathButton');
+
+        let visibleCount = 0;
+
+        cards.forEach(function(card) {
+            const matches = card.dataset.section === section;
+
+            card.style.display = matches ? 'block' : 'none';
+
+            if (matches) {
+                visibleCount++;
+            }
+        });
+
+        questionList.style.display = 'block';
+        sectionMessage.style.display = 'none';
+        noQuestionsMessage.style.display =
+            visibleCount === 0 ? 'block' : 'none';
+
+        rwButton.classList.toggle(
+            'btn-primary',
+            section === 'Reading and Writing'
+        );
+        rwButton.classList.toggle(
+            'btn-outline-primary',
+            section !== 'Reading and Writing'
+        );
+
+        mathButton.classList.toggle(
+            'btn-primary',
+            section === 'Math'
+        );
+        mathButton.classList.toggle(
+            'btn-outline-primary',
+            section !== 'Math'
+        );
+    }
+</script>
+{% endblock %}

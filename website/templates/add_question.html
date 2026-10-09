@@ -1,0 +1,400 @@
+```html
+{% extends "base.html" %}
+
+{% block title %}Add SAT Question{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+
+    <h1>Add an SAT Question</h1>
+    <p class="text-muted">
+        Add a question to the Question Bank or assign it to a specific mock test.
+    </p>
+
+    <form method="POST"
+          action="{{ url_for('views.add_question') }}"
+          id="addQuestionForm"
+          enctype="multipart/form-data">
+
+        <!-- Question Collection -->
+        <div class="form-group mb-4">
+            <label for="question_type">
+                <strong>Where should this question be saved?</strong>
+            </label>
+
+            <select class="form-control"
+                    id="question_type"
+                    name="question_type"
+                    required>
+                <option value="question_bank"
+                    {% if selected_collection|default('question_bank') == 'question_bank' %}selected{% endif %}>
+                    Question Bank
+                </option>
+
+                <option value="mock_test"
+                    {% if selected_collection|default('question_bank') == 'mock_test' %}selected{% endif %}>
+                    Full-Length Mock Test
+                </option>
+            </select>
+        </div>
+
+        <!-- Mock Test Selector -->
+        <div class="form-group mb-4"
+             id="mockTestSelector"
+             style="display: none;">
+
+            <label for="mock_test_id">
+                <strong>Select Mock Test</strong>
+            </label>
+
+            <select class="form-control"
+                    id="mock_test_id"
+                    name="mock_test_id">
+
+                <option value="">Choose a mock test</option>
+
+                {% for test in mock_tests|default([]) %}
+                    {% if test.is_active %}
+                    <option value="{{ test.id }}"
+                        {% if selected_mock_test_id|default('')|string == test.id|string %}selected{% endif %}>
+                        {{ test.title }}
+                    </option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+
+            {% if not mock_tests|default([]) %}
+            <small class="form-text text-danger">
+                No active mock tests are available. Create a mock test first.
+            </small>
+            {% endif %}
+        </div>
+
+        <hr>
+
+        <!-- Test Assignment -->
+        <h4>Test Assignment</h4>
+
+        <div class="form-group mb-3">
+            <label for="section">SAT Section</label>
+
+            <select class="form-control"
+                    id="section"
+                    name="section"
+                    required>
+                <option value="Reading and Writing">
+                    Reading and Writing
+                </option>
+                <option value="Math">Math</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="module_number">SAT Module</label>
+
+            <select class="form-control"
+                    id="module_number"
+                    name="module_number"
+                    required>
+                <option value="1" selected>Module 1</option>
+                <option value="2">Module 2</option>
+            </select>
+
+            <small class="form-text text-muted">
+                Module 1 is shared by both practice routes. Module 2 questions
+                must be assigned to either the higher or lower route.
+            </small>
+        </div>
+
+        <!-- Adaptive Route -->
+        <div class="form-group mb-4"
+             id="routeSelector"
+             style="display: none;">
+
+            <label for="module2_route">
+                <strong>Module 2 Adaptive Route</strong>
+            </label>
+
+            <select class="form-control"
+                    id="module2_route"
+                    name="module2_route">
+
+                <option value="">Choose a route</option>
+                <option value="higher">Higher route</option>
+                <option value="lower">Lower route</option>
+            </select>
+
+            <small class="form-text text-muted">
+                Use separate Module 2 question pools for the higher and lower
+                practice routes. This is a practice-routing system and does
+                not claim to reproduce the official SAT algorithm.
+            </small>
+        </div>
+
+        <hr>
+
+        <!-- Question Details -->
+        <h4>Question Details</h4>
+
+        <div class="form-group mb-3">
+            <label for="domain">Domain</label>
+
+            <input class="form-control"
+                   type="text"
+                   id="domain"
+                   name="domain"
+                   placeholder="e.g. Algebra"
+                   required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="skill">Skill</label>
+
+            <input class="form-control"
+                   type="text"
+                   id="skill"
+                   name="skill"
+                   placeholder="e.g. Linear equations"
+                   required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="difficulty">Difficulty</label>
+
+            <select class="form-control"
+                    id="difficulty"
+                    name="difficulty"
+                    required>
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="passage">Passage (optional)</label>
+
+            <textarea class="form-control"
+                      id="passage"
+                      name="passage"
+                      rows="4"
+                      placeholder="Enter a reading passage if needed."></textarea>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="prompt">Question</label>
+
+            <textarea class="form-control"
+                      id="prompt"
+                      name="prompt"
+                      rows="3"
+                      placeholder="Enter the question."
+                      required></textarea>
+        </div>
+
+        <!-- Optional Image -->
+        <div class="form-group mb-4">
+            <label for="image">Question Image (optional)</label>
+
+            <input class="form-control-file d-block"
+                   type="file"
+                   id="image"
+                   name="image"
+                   accept=".png,.jpg,.jpeg,.gif,.webp,image/png,image/jpeg,image/gif,image/webp">
+
+            <small class="form-text text-muted">
+                Supported formats: PNG, JPG, JPEG, GIF, and WEBP.
+            </small>
+
+            <img id="imagePreview"
+                 alt="Selected question image preview"
+                 style="display: none; max-width: 100%; max-height: 300px; margin-top: 12px; border-radius: 8px;">
+        </div>
+
+        <!-- Answer Choices -->
+        <h4>Answer Choices</h4>
+
+        {% for letter in ['A', 'B', 'C', 'D'] %}
+        <div class="form-group mb-3">
+            <label for="choice_{{ letter }}">
+                Choice {{ letter }}
+            </label>
+
+            <input class="form-control"
+                   type="text"
+                   id="choice_{{ letter }}"
+                   name="choice_{{ letter }}"
+                   placeholder="Enter choice {{ letter }}"
+                   required>
+        </div>
+        {% endfor %}
+
+        <div class="form-group mb-4">
+            <label for="correct_answer">
+                <strong>Correct Answer</strong>
+            </label>
+
+            <select class="form-control"
+                    id="correct_answer"
+                    name="correct_answer"
+                    required>
+                <option value="A">A - Choice A</option>
+                <option value="B">B - Choice B</option>
+                <option value="C">C - Choice C</option>
+                <option value="D">D - Choice D</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-4">
+            <label for="explanation">Explanation</label>
+
+            <textarea class="form-control"
+                      id="explanation"
+                      name="explanation"
+                      rows="4"
+                      placeholder="Explain why the correct answer is correct."
+                      required></textarea>
+        </div>
+
+        <!-- Form Actions -->
+        <button type="submit" class="btn btn-primary" id="saveQuestionButton">
+            Save Question
+        </button>
+
+        <a href="{{ url_for('views.question_bank') }}"
+           class="btn btn-secondary ml-2">
+            Cancel
+        </a>
+
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('addQuestionForm');
+
+    const collectionSelect = document.getElementById('question_type');
+    const mockTestSelector = document.getElementById('mockTestSelector');
+    const mockTestSelect = document.getElementById('mock_test_id');
+
+    const moduleSelect = document.getElementById('module_number');
+    const routeSelector = document.getElementById('routeSelector');
+    const routeSelect = document.getElementById('module2_route');
+
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('imagePreview');
+
+    const saveButton = document.getElementById('saveQuestionButton');
+
+    let previewObjectUrl = null;
+
+    // Show or hide the mock-test selector.
+    function updateCollectionFields() {
+        const isMockTest = collectionSelect.value === 'mock_test';
+
+        mockTestSelector.style.display = isMockTest ? 'block' : 'none';
+
+        mockTestSelect.required = isMockTest;
+        mockTestSelect.disabled = !isMockTest;
+
+        if (!isMockTest) {
+            mockTestSelect.value = '';
+        }
+    }
+
+    // Show or hide the Module 2 route selector.
+    function updateRouteFields() {
+        const isModule2 = moduleSelect.value === '2';
+
+        routeSelector.style.display = isModule2 ? 'block' : 'none';
+
+        routeSelect.required = isModule2;
+        routeSelect.disabled = !isModule2;
+
+        if (!isModule2) {
+            routeSelect.value = '';
+        }
+    }
+
+    // Clear the image preview and release its temporary URL.
+    function clearImagePreview() {
+        if (previewObjectUrl) {
+            URL.revokeObjectURL(previewObjectUrl);
+            previewObjectUrl = null;
+        }
+
+        imagePreview.removeAttribute('src');
+        imagePreview.style.display = 'none';
+    }
+
+    collectionSelect.addEventListener('change', updateCollectionFields);
+    moduleSelect.addEventListener('change', updateRouteFields);
+
+    // Set the correct initial state on page load.
+    updateCollectionFields();
+    updateRouteFields();
+
+    // Validate the form before submitting.
+    form.addEventListener('submit', function (event) {
+        if (
+            collectionSelect.value === 'mock_test' &&
+            !mockTestSelect.value
+        ) {
+            event.preventDefault();
+
+            alert('Please select the mock test for this question.');
+
+            mockTestSelect.focus();
+            return;
+        }
+
+        if (
+            moduleSelect.value === '2' &&
+            !routeSelect.value
+        ) {
+            event.preventDefault();
+
+            alert('Please select a higher or lower route for this Module 2 question.');
+
+            routeSelect.focus();
+            return;
+        }
+
+        // Prevent accidental double-click submissions.
+        saveButton.disabled = true;
+        saveButton.textContent = 'Saving...';
+    });
+
+    // Preview an optional question image.
+    imageInput.addEventListener('change', function () {
+        const file = imageInput.files[0];
+
+        clearImagePreview();
+
+        if (!file) {
+            return;
+        }
+
+        const allowedTypes = [
+            'image/png',
+            'image/jpeg',
+            'image/gif',
+            'image/webp'
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            alert('Please select a PNG, JPG, JPEG, GIF, or WEBP image.');
+
+            imageInput.value = '';
+            return;
+        }
+
+        previewObjectUrl = URL.createObjectURL(file);
+
+        imagePreview.src = previewObjectUrl;
+        imagePreview.style.display = 'block';
+    });
+});
+</script>
+{% endblock %}
+```

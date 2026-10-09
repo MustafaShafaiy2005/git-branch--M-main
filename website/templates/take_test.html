@@ -1,0 +1,232 @@
+
+{% extends "base.html" %}
+
+{% block title %}SAT Practice Test{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">SAT Practice Test</h2>
+                <span class="text-muted">
+                    Question {{ current_index + 1 }} of {{ total_questions }}
+                </span>
+            </div>
+
+            <!-- Progress -->
+            {% set progress = ((current_index + 1) / total_questions * 100) | round | int %}
+
+            <div class="progress mb-4" style="height: 8px;">
+                <div
+                    class="progress-bar"
+                    role="progressbar"
+                  data-progress="{{ progress }}"
+                    aria-valuenow="{{ current_index + 1 }}"
+                    aria-valuemin="0"
+                    aria-valuemax="{{ total_questions }}">
+                </div>
+            </div>
+
+            <!-- Question information -->
+            <p class="text-muted mb-2">
+                {{ current_answer.question.section }}
+                · {{ current_answer.question.domain }}
+                · {{ current_answer.question.difficulty | title }}
+            </p>
+
+            <!-- Passage -->
+            {% if current_answer.question.passage %}
+                <div class="border rounded p-3 mb-4 bg-light passage-text">
+                    {{ current_answer.question.passage }}
+                </div>
+            {% endif %}
+
+            <!-- Question -->
+            <h3 class="h5 mb-4 question-prompt">
+                {{ current_answer.question.prompt }}
+            </h3>
+
+            {% set choices = current_answer.question.choices | from_json %}
+
+            <!-- Answer form -->
+            <form method="POST" id="answerForm">
+                <input
+                    type="hidden"
+                    name="answer_id"
+                    value="{{ current_answer.id }}">
+
+                <input
+                    type="hidden"
+                    name="current_index"
+                    value="{{ current_index }}">
+
+                <fieldset class="answer-fieldset">
+                    <legend class="h6 mb-3">Choose one answer:</legend>
+
+                    {% for letter in ['A', 'B', 'C', 'D'] %}
+                        <label class="answer-choice
+                            {% if current_answer.selected_answer == letter %}selected{% endif %}">
+
+                            <input
+                                class="answer-radio"
+                                type="radio"
+                                name="selected_answer"
+                                value="{{ letter }}"
+                                {% if current_answer.selected_answer == letter %}checked{% endif %}>
+
+                            <span class="answer-text">
+                                <strong>{{ letter }}.</strong>
+                                {{ choices.get(letter, '') }}
+                            </span>
+                        </label>
+                    {% endfor %}
+                </fieldset>
+
+                <!-- Navigation -->
+                <div class="d-flex justify-content-between flex-wrap mt-4">
+
+                    {% if current_index > 0 %}
+                        <button
+                            type="submit"
+                            name="target_answer_id"
+                            value="{{ answers[current_index - 1].id }}"
+                            class="btn btn-outline-secondary mb-2">
+                            Previous
+                        </button>
+                    {% else %}
+                        <span></span>
+                    {% endif %}
+
+                    {% if current_index < total_questions - 1 %}
+                        <button
+                            type="submit"
+                            name="target_answer_id"
+                            value="{{ answers[current_index + 1].id }}"
+                            class="btn btn-primary mb-2">
+                            Save &amp; Next
+                        </button>
+                    {% else %}
+                        <button
+                            type="submit"
+                            name="action"
+                            value="submit"
+                            class="btn btn-success mb-2"
+                            onclick="return confirm('Submit your test and view your results?');">
+                            Submit Test
+                        </button>
+                    {% endif %}
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .question-prompt,
+    .passage-text {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    .answer-fieldset {
+        min-width: 0;
+        border: 0;
+        padding: 0;
+        margin: 0;
+    }
+
+    .answer-choice {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 16px;
+        margin-bottom: 12px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        background: #ffffff;
+        cursor: pointer;
+        position: relative;
+        pointer-events: auto;
+        transition: background-color 0.15s, border-color 0.15s;
+    }
+
+    .answer-choice:hover {
+        background: #f0f5ff;
+        border-color: #0d6efd;
+    }
+
+    .answer-choice.selected {
+        background: #eaf2ff;
+        border-color: #0d6efd;
+    }
+
+    .answer-radio {
+        display: block !important;
+        appearance: auto !important;
+        -webkit-appearance: radio !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        position: relative;
+        z-index: 2;
+        pointer-events: auto !important;
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        margin: 2px 0 0;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .answer-text {
+        flex: 1;
+        cursor: pointer;
+        overflow-wrap: anywhere;
+        pointer-events: auto;
+    }
+
+    .answer-choice.selected .answer-text {
+        color: #0d6efd;
+    }
+
+    .answer-choice:focus-within {
+        outline: 2px solid #80bdff;
+        outline-offset: 2px;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const answerForm = document.getElementById('answerForm');
+
+        if (!answerForm) {
+            return;
+        }
+
+        const radios = answerForm.querySelectorAll(
+            'input[type="radio"][name="selected_answer"]'
+        );
+
+        function updateSelectedAnswer() {
+            radios.forEach(function (radio) {
+                const label = radio.closest('.answer-choice');
+
+                if (label) {
+                    label.classList.toggle('selected', radio.checked);
+                }
+            });
+        }
+
+        radios.forEach(function (radio) {
+            radio.addEventListener('change', updateSelectedAnswer);
+        });
+
+        updateSelectedAnswer();
+    });
+</script>
+{% endblock %}

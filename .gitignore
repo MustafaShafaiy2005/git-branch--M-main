@@ -1,0 +1,10 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+instance/
+.pytest_cache/
+.mypy_cache/
+website/static/uploads/questions/

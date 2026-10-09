@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}My Score History{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>My Score History</h1>
+            <p class="text-muted mb-0">
+                Review your completed SAT mock tests and past results.
+            </p>
+        </div>
+
+        <a href="{{ url_for('views.mock_tests') }}"
+           class="btn btn-outline-primary">
+            Browse Mock Tests
+        </a>
+    </div>
+
+    {% if history %}
+        <div class="row">
+            {% for item in history %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+
+                            <h5 class="card-title">
+                                {% if item.mock_test %}
+                                    {{ item.mock_test.title }}
+                                {% else %}
+                                    Previous Practice Test
+                                {% endif %}
+                            </h5>
+
+                            <p class="text-muted small">
+                                {% if item.attempt.completed_at %}
+                                    Completed:
+                                    {{ item.attempt.completed_at.strftime('%d %b %Y, %I:%M %p') }}
+                                {% else %}
+                                    Completion date unavailable
+                                {% endif %}
+                            </p>
+
+                            <hr>
+
+                            <p>
+                                <strong>Correct answers:</strong>
+                                {{ item.correct_answers }}
+                                / {{ item.total_questions }}
+                            </p>
+
+                            <p>
+                                <strong>Percentage:</strong>
+                                {{ item.percentage }}%
+                            </p>
+
+                            <div class="progress mb-3"
+                                 role="progressbar"
+                                 aria-label="Test percentage"
+                                 aria-valuenow="{{ item.percentage }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                                <div class="progress-bar">
+                                    {{ item.percentage }}%
+                                </div>
+                            </div>
+
+                            <a href="{{ url_for('views.test_results', attempt_id=item.attempt.id) }}"
+                               class="btn btn-primary btn-block">
+                                Review Results
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <h4>No completed tests yet</h4>
+
+                <p class="text-muted">
+                    Your scores will appear here after you complete
+                    your first mock test.
+                </p>
+
+                <a href="{{ url_for('views.mock_tests') }}"
+                   class="btn btn-primary">
+                    Start a Mock Test
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

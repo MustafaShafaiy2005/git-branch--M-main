@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}SAT Practice Tests{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+
+    <div class="text-center mb-5">
+        <h1>Digital SAT Practice Tests</h1>
+        <p class="lead">
+            Practice with questions from your SAT question bank.
+        </p>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4 p-md-5">
+
+                    <h3>Practice Test 1</h3>
+                    <p class="text-muted">
+                        A practice test built from the active questions
+                        currently available in your question bank.
+                    </p>
+
+                    <hr>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-4 h-100">
+                                <h5>Reading and Writing</h5>
+                                <p class="mb-0">
+                                    <strong>Available questions:</strong>
+                                    {{ rw_count }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-4 h-100">
+                                <h5>Math</h5>
+                                <p class="mb-0">
+                                    <strong>Available questions:</strong>
+                                    {{ math_count }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <strong>Before you begin</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Select one answer for each question.</li>
+                            <li>Save answers as you navigate.</li>
+                            <li>Submit your test to see your results.</li>
+                        </ul>
+                    </div>
+
+                    {% if total_active_questions > 0 %}
+                        <p>
+                            <strong>Total questions in this practice test:</strong>
+                            {{ total_active_questions }}
+                        </p>
+
+                        <form method="POST"
+                              action="{{ url_for('views.start_test') }}">
+                            <button type="submit"
+                                    class="btn btn-primary btn-lg">
+                                Start Practice Test
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-warning mt-4">
+                            No active questions are available yet.
+                            Please ask an administrator to add or activate questions.
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <a href="{{ url_for('views.question_bank') }}"
+               class="btn btn-outline-secondary">
+                View Question Bank
+            </a>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
