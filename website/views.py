@@ -1,3 +1,4 @@
+
 from pathlib import Path
 from uuid import uuid4
 from functools import wraps
@@ -55,10 +56,7 @@ def admin_required(view_function):
 # ==========================================
 
 def save_question_image():
-    """
-    Save an optional question image inside static/uploads/questions.
-    Return its path relative to the static folder.
-    """
+    """Save an optional image in static/uploads/questions."""
     image = request.files.get('image')
 
     if not image or not image.filename:
@@ -85,24 +83,32 @@ def save_question_image():
         / 'questions'
     )
     upload_folder.mkdir(parents=True, exist_ok=True)
-
     image.save(upload_folder / filename)
 
     return f'uploads/questions/{filename}'
 
 
 # ==========================================
-# Dashboard
+# Homepage: public landing page / SAT dashboard
 # ==========================================
 
 @views.route('/')
-@login_required
 def home():
+    if current_user.is_authenticated:
+        return render_template(
+            'sat_dashboard.html',
+            user=current_user
+        )
+
     return render_template(
-        'sat_dashboard.html',
+        'landing.html',
         user=current_user
     )
 
+
+# ==========================================
+# SAT dashboard
+# ==========================================
 
 @views.route('/sat')
 @login_required
@@ -133,8 +139,6 @@ def from_json_filter(value):
 @views.route('/full-length-tests')
 @login_required
 def full_length_tests():
-    # Keep these counts for compatibility with the existing template.
-    # The Question Bank is no longer the main student-facing section.
     bank_questions = Question.query.filter(
         Question.is_active.is_(True),
         Question.question_type == 'question_bank',
@@ -176,7 +180,6 @@ def mock_tests():
         is_active=True
     ).order_by(MockTest.id.asc()).all()
 
-    # Count only active questions assigned to each test.
     test_question_counts = {
         test.id: Question.query.filter_by(
             mock_test_id=test.id,
@@ -308,9 +311,6 @@ def add_question():
             'explanation', ''
         ).strip()
 
-        # Server-side enforcement: every new question must belong
-        # to an existing, active mock test. Question Bank submissions
-        # are no longer accepted.
         mock_test_id_raw = request.form.get(
             'mock_test_id', ''
         ).strip()
@@ -487,11 +487,8 @@ def delete_question(question_id):
     db.session.delete(question)
     db.session.commit()
 
-    # Remove the image only after the database deletion succeeds.
     if image_path:
-        image_file = (
-            Path(current_app.static_folder) / image_path
-        )
+        image_file = Path(current_app.static_folder) / image_path
 
         try:
             image_file.resolve().relative_to(
@@ -516,14 +513,11 @@ def delete_question(question_id):
             )
         )
 
-    # Old Question Bank questions are retained unless an admin
-    # explicitly deletes one through an old link.
     return redirect(url_for('views.mock_tests'))
 
 
 # ==========================================
 # Legacy Question Bank practice
-# Existing route retained to avoid breaking old links.
 # ==========================================
 
 @views.route('/start-test', methods=['POST'])
@@ -560,7 +554,6 @@ def start_mock_test(mock_test_id):
     if mock_test is None or not mock_test.is_active:
         abort(404)
 
-    # Only this mock test's active questions are included.
     questions = Question.query.filter_by(
         is_active=True,
         question_type='mock_test',
