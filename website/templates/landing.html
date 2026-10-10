@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}Digital SAT Practice | Mustafa Shafaiy{% endblock %}
+
+{% block content %}
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+    .sat-landing {
+        font-family: 'Inter', sans-serif;
+        color: #263248;
+        overflow: hidden;
+    }
+
+    .sat-landing h1,
+    .sat-landing h2,
+    .sat-landing h3,
+    .sat-landing h5 {
+        font-family: 'Manrope', sans-serif;
+        color: #15233b;
+    }
+
+    .sat-hero {
+        padding-top: 85px;
+        padding-bottom: 55px;
+    }
+
+    .sat-eyebrow {
+        display: inline-block;
+        padding: 9px 15px;
+        margin-bottom: 25px;
+        border-radius: 50px;
+        background: #eef2ff;
+        color: #4059c7;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1.8px;
+    }
+
+    .sat-title {
+        max-width: 850px;
+        margin: 0 auto 24px;
+        font-size: clamp(2.7rem, 5.5vw, 4.6rem);
+        font-weight: 800;
+        line-height: 1.12;
+        letter-spacing: -2.8px;
+    }
+
+    .sat-title span {
+        color: #4f63d9;
+    }
+
+    .sat-description {
+        max-width: 620px;
+        margin: 0 auto 34px;
+        color: #64748b;
+        font-size: 17px;
+        line-height: 1.85;
+    }
+
+    .sat-actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+
+    .sat-btn {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 52px;
+        padding: 13px 25px;
+        border-radius: 10px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .sat-btn-primary {
+        background: #4358ca;
+        border: 1px solid #4358ca;
+        color: #ffffff;
+        box-shadow: 0 8px 18px rgba(67, 88, 202, 0.17);
+    }
+
+    .sat-btn-primary:hover {
+        background: #3448b5;
+        border-color: #3448b5;
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+    .sat-btn-secondary {
+        background: #ffffff;
+        border: 1px solid #dce2ec;
+        color: #24334b;
+    }
+
+    .sat-btn-secondary:hover {
+        background: #f8faff;
+        border-color: #aeb9d0;
+        color: #24334b;
+        transform: translateY(-2px);
+    }
+
+    .sat-features {
+        padding-top: 40px;
+        padding-bottom: 55px;
+    }
+
+    .sat-feature-card {
+        height: 100%;
+        padding: 28px 25px;
+        background: #ffffff;
+        border: 1px solid #e7ebf2;
+        border-radius: 16px;
+        box-shadow: 0 5px 22px rgba(24, 39, 75, 0.035);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .sat-feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 14px 30px rgba(24, 39, 75, 0.08);
+    }
+
+    .sat-feature-icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 21px;
+        border-radius: 12px;
+        background: #eef2ff;
+        color: #4358ca;
+        font-size: 22px;
+    }
+
+    .sat-feature-card h5 {
+        margin-bottom: 10px;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.4px;
+    }
+
+    .sat-feature-card p {
+        margin-bottom: 0;
+        color: #718096;
+        font-size: 14px;
+        line-height: 1.85;
+    }
+
+    .sat-footer {
+        padding: 25px 0 10px;
+        color: #94a0b2;
+        font-size: 13px;
+        text-align: center;
+    }
+
+    @media (max-width: 767px) {
+        .sat-hero {
+            padding-top: 55px;
+            padding-bottom: 30px;
+        }
+
+        .sat-title {
+            font-size: clamp(2.4rem, 9vw, 3.5rem);
+            letter-spacing: -1.7px;
+        }
+
+        .sat-description {
+            font-size: 15px;
+        }
+
+        .sat-features {
+            padding-top: 25px;
+        }
+
+        .sat-feature-card {
+            padding: 24px;
+        }
+
+        .sat-btn {
+            width: 100%;
+        }
+
+        .sat-actions {
+            gap: 11px;
+        }
+    }
+</style>
+
+<div class="sat-landing">
+    <section class="container sat-hero">
+        <div class="row">
+            <div class="col-12 text-center">
+
+                <div class="sat-eyebrow">
+                    DIGITAL SAT PRACTICE PLATFORM
+                </div>
+
+                <h1 class="sat-title">
+                    Prepare smarter.<br>
+                    <span>Reach your SAT goals.</span>
+                </h1>
+
+                <p class="sat-description">
+                    Build your confidence with SAT question practice,
+                    full-length mock tests, and performance reviews.
+                    Everything you need to prepare, all in one place.
+                </p>
+
+                <div class="sat-actions">
+                    <a href="{{ url_for('auth.sign_up') }}"
+                       class="sat-btn sat-btn-primary">
+                        Create an Account &rarr;
+                    </a>
+
+                    <a href="{{ url_for('auth.login') }}"
+                       class="sat-btn sat-btn-secondary">
+                        Log In
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="container sat-features">
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <div class="sat-feature-card">
+                    <div class="sat-feature-icon" aria-hidden="true">
+                        &#9997;
+                    </div>
+
+                    <h5>Question Practice</h5>
+
+                    <p>
+                        Strengthen your Reading and Writing and Math
+                        skills through focused practice questions.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="sat-feature-card">
+                    <div class="sat-feature-icon" aria-hidden="true">
+                        &#128221;
+                    </div>
+
+                    <h5>Full-Length Mock Tests</h5>
+
+                    <p>
+                        Prepare for test day by practising with mock
+                        tests and questions available on the platform.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="sat-feature-card">
+                    <div class="sat-feature-icon" aria-hidden="true">
+                        &#128200;
+                    </div>
+
+                    <h5>Track Your Progress</h5>
+
+                    <p>
+                        Review your results, identify areas for
+                        improvement, and make every practice session count.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="sat-footer">
+            Created by Mustafa Shafaiy
+        </div>
+    </section>
+</div>
+
+{% endblock %}
